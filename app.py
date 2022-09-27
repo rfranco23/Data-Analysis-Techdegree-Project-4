@@ -18,7 +18,8 @@ class Brands(Base):
 
     brand_id = Column(Integer, primary_key=True)
     brand_name = Column('Brand Name', String)
-    # brand_rel_1 = relationship('Product', back_populates='back_rel_2')
+    brand_rel_1 = relationship('Product', back_populates='brand_rel_2',
+                               cascade='all, delete, delete-orphan')
 
     def __repr__(self):
         return f'''
@@ -36,8 +37,7 @@ class Product(Base):
     product_price = Column('Product Price', Integer)
     date_updated = Column('Date Updated', Date)
     brand_id = Column('Brand ID', Integer, ForeignKey('brands.brand_id'))
-    # brand_rel_2 = relationship('Brands', back_populates='brand_rel_1',
-    #                      cascade='all, delete, delete-orphan')
+    brand_rel_2 = relationship('Brands', back_populates='brand_rel_1')
 
     def __repr__(self):
         return f'''
@@ -95,7 +95,7 @@ def clean_price(price_str):
 
 
 def add_brands_csv():
-    with open('store-inventory/brands.csv', 'r') as csvfile:
+    with open('store-inventory/brands.csv') as csvfile:
         data = csv.reader(csvfile)
         next(data)
         for row in data:
@@ -111,12 +111,12 @@ def add_inventory_csv():
         next(data)
         for row in data:
             product_name = row[0]
-            product_price = clean_price(row[1])
             product_quantity = clean_product_quantity(row[2])
+            product_price = clean_price(row[1])
             date = clean_date(row[3])
-            brand_id = session.query(Product)
-            new_product = Product(product_name=product_name, product_quantity=product_quantity, product_price=product_price, 
-                                date_updated=date, brand_id=brand_id)
+            brand_id = session.query(Product).filter(Product.brand_id==Brands.brand_id)
+            new_product = Product(product_name=product_name, product_quantity=product_quantity,  
+                                  product_price=product_price, date_updated=date, brand_id=brand_id)
             session.add(new_product)
         session.commit()
 
