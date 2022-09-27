@@ -18,7 +18,7 @@ class Brands(Base):
 
     brand_id = Column(Integer, primary_key=True)
     brand_name = Column('Brand Name', String)
-    brand_rel_1 = relationship('Product', back_populates='back_rel_2')
+    # brand_rel_1 = relationship('Product', back_populates='back_rel_2')
 
     def __repr__(self):
         return f'''
@@ -36,8 +36,8 @@ class Product(Base):
     product_price = Column('Product Price', Integer)
     date_updated = Column('Date Updated', Date)
     brand_id = Column('Brand ID', Integer, ForeignKey('brands.brand_id'))
-    brand_rel_2 = relationship('Brands', back_populates='brand_rel_1',
-                         cascade='all, delete, delete-orphan')
+    # brand_rel_2 = relationship('Brands', back_populates='brand_rel_1',
+    #                      cascade='all, delete, delete-orphan')
 
     def __repr__(self):
         return f'''
@@ -95,8 +95,9 @@ def clean_price(price_str):
 
 
 def add_brands_csv():
-    with open('store-inventory/brands.csv') as csvfile:
+    with open('store-inventory/brands.csv', 'r') as csvfile:
         data = csv.reader(csvfile)
+        next(data)
         for row in data:
             brand_name = row[0]
             new_brand = Brands(brand_name=brand_name)
@@ -107,15 +108,15 @@ def add_brands_csv():
 def add_inventory_csv():
     with open('store-inventory/inventory.csv') as csvfile:
         data = csv.reader(csvfile)
+        next(data)
         for row in data:
             product_name = row[0]
             product_price = clean_price(row[1])
             product_quantity = clean_product_quantity(row[2])
             date = clean_date(row[3])
-            brand_name = row[4]
-            brand_id = session.query(Product).filter(Product.brand_id==brand_id)
+            brand_id = session.query(Product)
             new_product = Product(product_name=product_name, product_quantity=product_quantity, product_price=product_price, 
-                                  date_updated=date, brand_name=brand_name, brand_id=brand_id)
+                                date_updated=date, brand_id=brand_id)
             session.add(new_product)
         session.commit()
 
@@ -146,5 +147,5 @@ if __name__ == '__main__':
     # app()
     add_inventory_csv()
 
-    # for product in session.query(Product):
-    #     print(product)
+    for product in session.query(Product):
+        print(product)
