@@ -114,7 +114,8 @@ def add_inventory_csv():
             product_quantity = clean_product_quantity(row[2])
             product_price = clean_price(row[1])
             date = clean_date(row[3])
-            brand_id = session.query(Product).filter(Product.brand_id==Brands.brand_id)
+            # brand_name = row[4]
+            brand_id = session.query(Brands.brand_id)
             new_product = Product(product_name=product_name, product_quantity=product_quantity,  
                                   product_price=product_price, date_updated=date, brand_id=brand_id)
             session.add(new_product)
@@ -145,6 +146,7 @@ def app():
 if __name__ == '__main__':
     Base.metadata.create_all(engine)
     # app()
+    add_brands_csv()
     add_inventory_csv()
 
     for product in session.query(Product):
